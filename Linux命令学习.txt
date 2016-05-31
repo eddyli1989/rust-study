@@ -1,0 +1,256 @@
+grep 命令:对结果进行过滤
+
+注意grep与find的区别,grep查找文件内容，find查找文件
+
+========================================
+从终端直接运行grep,默认从标准输入读取数据
+
+用法:grep [选项]... PATTERN [FILE]...
+
+-i 选项(忽略大小写)：
+
+例如:
+
+echo python | grep -i PYTHON
+输出 python
+
+如果要在文件中搜索
+
+grep -i python file_name
+
+-r选项(递归的搜索目录)
+-n选项(打印匹配的行号和内容)
+-c选项(只打印匹配的行数)
+
+例如
+grep -r python dir_name
+
+将会递归的搜索dir_name目录下所有的文件中包含python的文件
+并且会打印出匹配的文件路径和对应的行数
+例如
+
+grep -ir hi test/
+
+输出
+test/grep_play:hi this is a test
+test/hi:this is hi in hi file
+
+
+grep -inr hi test/
+输出
+test/grep_play:1:hi this is a test
+test/hi:1:this is hi in hi file
+
+grep -inrc hi test/
+输出
+test/grep_play:1
+test/hi:1
+
+
+grep -R --include="*.txt" "pattern" /path/to/dir
+
+对要搜索的文件进行过滤
+
+grep -v 对输出反选
+========================================================================
+useradd 添加用户
+
+用法 useradd option user
+
+常用选项
+-d  用户目录
+-g  用户组
+-m  用户目录不存在时创建
+
+例如:
+useradd -d /home/eddyli -g users -m eddyli
+添加完用户后要使用
+pwsswd 命令设置用户密码
+
+usermod 修改用户信息
+用法和useradd类似
+
+smba添加用户，首先保证用户在系统中存在，然后直接运行
+pdbedit -a eddyli
+然后输入访问密码即可
+==================================================================
+lsof （list open files）列出系统的打开文件信息，可以列出一个进程打开的文件，也可以列出打开某个文件的进程信息
+需要root
+
+用法　lsof filename  /列出打开filename的所有进程
+
+常用选项
+-c  进程名 ，列出某个进程打开的所有文件
+-u  用户名 ，列出某个用户打开的所有文件
+-p  进程ID ，列出某个进程打开的所有文件
+
+例子：
+lsof -p 10003
+列出进程ID为10003的所有文件信息
+==================================================================
+同步时间
+//tencent服务器上有效
+1、/usr/local/ieod-public/ntpdate/ntpdate.sh
+2、/usr/sbin/ntpdate 172.23.16.24 172.17.142.46  10.170.4.150 172.23.32.142 172.16.32.203 10.142.22.11 10.182.28.200 10.172.49.165
+3、date -s “$time”设置
+
+===================================================================
+
+sort 命令
+
+-n 按照数字排序
+-t [分隔符] 每行使用分隔符来分隔成若干列
+-k [n] 按照第n列来排序
+
+=============================================
+uniq
+一般和sort一起使用，用于去除重复行，注意：他只去除挨在一起的重复行
+所以要和sort一起用
+
+uniq -f 可以忽略字段
+
+=============================================
+awk命令格式
+
+awk -F"分隔符" '条件 {语句}' [文件（支持通配符]或 awk -F"分隔符" '/正则/ {语句}' [文件（支持通配符]
+
+注意 条件语句必须包在单引号中，而不是双引号
+
+例如:
+echo "test|111" | awk -F"|" '$1=="test" {print $0}'
+输出 test|111，此处print $0可以不写，默认输出符合规则的语句
+比较字符串必须用双引号，否则按照数字比较
+
+对某列求和
+awk -F"|" '$1==20007 {sum+=$9}END{print sum}'
+//从这里也能看出来awk的变量不使用$来引用
+
+awk去除重复行
+awk '!a[$0]++' file
+
+RS分隔符(行分隔符，可以记为row seprate)
+echo "111 222|333 444|555 666"|awk 'BEGIN{RS="|"}{print $0,RT}'
+输出：
+ 111 222 |
+ 333 444 |
+ 555 666
+
+其实和-F参数很像，不过功能更强大，因为可以有正则表达式,例如
+echo "111 222a333 444b555 666"|awk 'BEGIN{RS="[a-z]+"}{print $1,RS,RT}'
+
+ 输出：
+ 111 [a-z]+ a
+ 333 [a-z]+ b
+ 555 [a-z]+
+
+PS:RS会打印出当前的行分隔符表达式，RT是具体的分隔符内容
+
+
+awk 过滤xml的注释
+awk 'BEGIN{RS="<!--|-->"}NR%2' xmlfile
+
+
+awk 使用shell中的变量
+dev=$1
+echo `cat ip.txt | awk -F":"  '$1==dev {print $2}' dev="$dev" `
+注意awk中的变量不使用$符号，也不使用双引号
+
+
+awk 删掉第一列
+awk '{$1="";print $0}'  file
+===================================================
+
+shell,遍历文件夹,-type d代表所有文件夹，-type f代表所有文件
+for f in find . -type d
+do
+ #////
+done
+
+===================================================
+expect
+
+send 完之后要加一个 exp_continue;，如果不是最后一个send的话
+===================================================
+find
+
+一般格式为 find -[H,L,P,O,D,help] path expretion
+
+即，除了前面列的-H,-L。。。神马的，其他的都在path后面
+
+比如 -name
+
+find . -name test
+===================================================
+svn
+
+比较两个版本的差异
+svn di -r version1:version2 path
+
+回滚版本
+svn merge -r version_new:version_target 文件
+回滚到version_target版本
+
+忽略文件或者文件夹
+svn propset svn:ignore '*' template_c/
+======================================================
+查看每个目录实际占用空间大小  du --max-depth=1 -h
+
+=========================================================
+crontab
+第1列分钟1～59
+第2列小时1～23（0表示子夜）
+第3列日1～31
+第4列月1～12
+第5列星期0～6（0表示星期天）
+第6列要运行的命令
+=========================================================
+
+iconv,对输出进行转码，例如你一个命令的输出是gbk的，但是当前终端的编码是UTF-8
+可以用这个，例如
+ls -al | iconv -f gbk
+可以把输出转成跟终端一样的编码
+
+=========================================================
+删除所有未attach的共享内存
+ipcs -m | awk '$6==0 {print $2}' | xargs -i -t ipcrm -m {}
+=========================================================
+mysql 字段太多，不太好看，在sql语句加\G，可以行列转置，比较容易看
+mysql -uyw -pyw --socket=/data1/mysqldata/20000/mysql.sock  db_naruto_logdb_1 
+--default-character-set=utf8 -e"select * from tb_uni_fuz_pre_fight_done where dtEventTime 
+like \"2015-09-16 %\" and iRivalRank=168 \G "
+===========================================================
+tar 解压缩到指定文件夹,-C必须是第一个被设置的参数，不然无效了
+tar zxvf 123.tar.gz -C folder_name
+
+tar 解压指定的文件
+tar zxvf dev223_zone_svr_10.205.149.90_20151212.tgz zone_svr/info/2015121219.log zone_svr/info/2015121220.log
+===========================================================
+ls -F . | grep /$
+列出所有目录
+============================================================
+时空间清数据
+delete from DBUniverseRankPlayer where season not in (select * from (select max(season) from DBUniverseRankPlayer) as t);
+========================================================================================================================
+
+sed -n '/^"组织GVG,开始构建战斗队伍"/,/GVG构建队伍完成$/p' 2015121219.log | grep -Ev '(^"组织GVG,开始构建战斗队伍"|GVG构建队伍完成$)' 
+=========================================================================================================================
+
+print *(player_teams_out._M_impl._M_start+1)
+
+
+mysql 的操作
+============================================================================================================================
+/usr/local/mysql/bin/mysqladmin -u root -p shutdown 
+sudo mysqld stop
+sudo mysql.server stop
+sudo stop mysql
+
+sh mysqld_safe & 会自动探测合适的参数启动
+
+================================================================================
+同步文件夹
+rsync -avth folder naruto@10.123.16.25:/data/eddyli/folder
+====================================================================================
+
+//按照时间排序
+ ls -rthl

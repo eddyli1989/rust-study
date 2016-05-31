@@ -1,0 +1,3 @@
+scp zhjz@10.123.9.66:/data/issue/zhjz_150828/Zhjz0.2Beta163Build0053220150828160245.tar.gz zhjz@10.210.250.142:/data/home/zhjz
+ossqqpet
+Conquer9z@2012

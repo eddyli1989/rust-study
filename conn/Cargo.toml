@@ -1,0 +1,12 @@
+[package]
+name = "conn"
+version = "0.1.0"
+authors = ["9527 <eddyil@outlook.com>"]
+
+
+[[bin]]
+name = "conn"
+path = "src/main_non_block.rs"
+
+[dependencies]
+comm = { path = "../comm" }
