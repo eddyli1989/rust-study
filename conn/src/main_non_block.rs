@@ -1,36 +1,14 @@
 #[allow(dead_code)]
 use std::net::{TcpListener, TcpStream,Shutdown,IpAddr,Ipv4Addr};
-use std::thread;
-use std::time::Duration;
 //由于tcpStream是继承了io里的file，所以需要包含
 use std::io::*;
 use std::mem;
-use std::ptr;
 extern crate comm;
 use comm::pkg_desc;
 use std::collections::VecDeque;
 
-//struct ConnectInfo<'a> {
-//    buffer:[u8;pkg_desc::MAX_PKG_SIZE], //存收到的数据
-//    pkg_size:usize,                     //head中的pkg_size
-//    recved_size:usize,                  //这个包中一共收到的数据
-//    //stream:&'a TcpStream,                  //链接
-//    stream: TcpStream,
-//    client_ip: IpAddr,
-//}
-//
-//impl<'a> ConnectInfo<'a> {
-//    pub fn new(tcp_stream:TcpStream) -> ConnectInfo<'a> {
-//        ConnectInfo {
-//            buffer : [0;pkg_desc::MAX_PKG_SIZE],
-//            pkg_size : 0,
-//            recved_size : 0,
-//            stream: tcp_stream,
-//            client_ip: IpAddr::V4(Ipv4Addr::new(0,0,0,0))
-//        }
-//    }
-//}
-
+extern crate redis;
+use redis::Commands;
 
 struct ConnectInfo {
     buffer:[u8;pkg_desc::MAX_PKG_SIZE], //存收到的数据
@@ -53,7 +31,7 @@ impl ConnectInfo {
 }
 
 fn main() {
-    let head_size = mem::size_of::<pkg_desc::pkg_head>();
+    let head_size = mem::size_of::<pkg_desc::PkgHead>();
     if head_size != pkg_desc::HEAD_SIZE {
         println!("head_size is error:real is :{},but defined:{}", head_size,pkg_desc::HEAD_SIZE);
         return;
@@ -61,6 +39,9 @@ fn main() {
 
     let listener = TcpListener::bind("127.0.0.1:8080").unwrap();
     println!("conn start run.");
+
+    let redis_client = redis::Client::open("redis://10.12.233.10:8080").unwrap();
+    let redis_con = redis_client.get_connection().unwrap();
 
     //设置为非阻塞IO
     listener.set_nonblocking(true).unwrap();
@@ -110,15 +91,15 @@ fn handle_client(connect:&mut ConnectInfo) ->i32 {
                 stream.shutdown(Shutdown::Both);
                 return 1;
             }
-            let mut pkg = pkg_desc::pkg::new();
+            let mut pkg = pkg_desc::Pkg::new();
             let mut buffer = &mut connect.buffer;
             let mut pkg_size = &mut connect.pkg_size;
             let mut total_size = &mut connect.recved_size;
             let mut next_size = 0;
             let mut valid_size = n;
-            if *total_size + n > pkg_desc::MAX_PKG_SIZE {
+            if *total_size + n > *pkg_size {
                 //这个包已经超了，可能读取到了下一个包的东西
-                valid_size = pkg_desc::MAX_PKG_SIZE - *total_size;
+                valid_size = *pkg_size - *total_size;
                 next_size  = n - valid_size;
             }
             buffer[*total_size..*total_size+valid_size].copy_from_slice(&read_buf[0..valid_size]);
