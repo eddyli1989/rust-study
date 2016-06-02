@@ -3,7 +3,7 @@ use std::fs::File;
 use std::io::Read;
 
 const FILE_PATH:&'static str = "../conf/conf.json";
-
+#[derive(Debug)]
 pub struct Config {
     file_content:String,
     json_obj: Json
@@ -16,12 +16,17 @@ lazy_static! {
 impl Config {
 
     fn new() -> Config {
-        // add code here
+        println!("new Config");
         let mut m = Config { file_content: String::new(),json_obj: Json::Null };
         let mut file = File::open(FILE_PATH).unwrap();
         file.read_to_string(&mut m.file_content).unwrap();
         m.json_obj = Json::from_str(&m.file_content).unwrap();
+        println!("Config init done");
         m
+    }
+
+    pub fn init(&self)  {
+        println!("start init Config");
     }
 
     pub fn instance<'a>() -> &'a Config{

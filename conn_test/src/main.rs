@@ -15,10 +15,10 @@ fn main() {
     println!("connect success!");
     let time_out = Some(one_seconds);
     //stream.set_write_timeout(None).unwrap();
-    let mut pkg = *Box::new(pkg_desc::pkg::new());
+    let mut pkg = *Box::new(pkg_desc::Pkg::new());
     pkg.head.magic = pkg_desc::MAGIC_IN_HEAD;
 
-    let head_size = mem::size_of::<pkg_desc::pkg_head>();
+    let head_size = mem::size_of::<pkg_desc::PkgHead>();
     println!("pkg_head size is {}",head_size);
     pkg.body.message[0] = 1;
     pkg.body.message[1] = 2;

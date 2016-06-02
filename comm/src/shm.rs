@@ -25,10 +25,17 @@ lazy_static! {
 impl ShmMgr {
 
     fn new() -> ShmMgr {
+        println!("start init ShmMgr");
         let mut m = ShmMgr {
             client: redis::Client::open(Config::instance().get_shm_addr()).unwrap()
         };
+        println!("shm addr:{}",Config::instance().get_shm_addr());
+        println!("ShmMgr init done");
         m
+    }
+
+    pub fn init(&self)  {
+        //empty
     }
 
     fn get_dst_addr(&self,src:&str) -> String {
@@ -47,7 +54,7 @@ impl ShmMgr {
         &SHMMGR
     }
 
-    pub fn send(&mut self,buf:Vec<u8>) -> Ret<()> {
+    pub fn send(&self,buf:Vec<u8>) -> Ret<()> {
         let mut connection = try!(self.client.get_connection().map_err(|redis_err| {
             Err { code:redis_err.kind() as i32, desc:redis_err.category().to_string() }
         }));

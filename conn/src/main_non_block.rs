@@ -36,6 +36,8 @@ fn main() {
         return;
     }
 
+    ShmMgr::instance().init();
+
     let listener = TcpListener::bind("127.0.0.1:8080").unwrap();
     println!("conn start run.");
 
@@ -93,7 +95,7 @@ fn handle_client(connect:&mut ConnectInfo) ->i32 {
             let mut total_size = &mut connect.recved_size;
             let mut next_size = 0;
             let mut valid_size = n;
-            if *total_size + n > *pkg_size {
+            if *pkg_size > 0 && *total_size + n > *pkg_size {
                 //这个包已经超了，可能读取到了下一个包的东西
                 valid_size = *pkg_size - *total_size;
                 next_size  = n - valid_size;
@@ -131,6 +133,9 @@ fn handle_client(connect:&mut ConnectInfo) ->i32 {
                 println!("pkg not read done,continue");
                 return 0;
             }
+
+            ShmMgr::instance().send((buffer[0..*pkg_size]).to_vec());
+
             unsafe { pkg =  mem::transmute(*buffer); }
             println!("pkg is read done,data is:");
             for x in 0..*pkg_size-pkg_desc::HEAD_SIZE {
