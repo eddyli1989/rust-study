@@ -3,12 +3,11 @@ use std::net::{TcpListener, TcpStream,Shutdown,IpAddr,Ipv4Addr};
 //由于tcpStream是继承了io里的file，所以需要包含
 use std::io::*;
 use std::mem;
+
 extern crate comm;
 use comm::pkg_desc;
+use comm::shm::ShmMgr;
 use std::collections::VecDeque;
-
-extern crate redis;
-use redis::Commands;
 
 struct ConnectInfo {
     buffer:[u8;pkg_desc::MAX_PKG_SIZE], //存收到的数据
@@ -39,9 +38,6 @@ fn main() {
 
     let listener = TcpListener::bind("127.0.0.1:8080").unwrap();
     println!("conn start run.");
-
-    let redis_client = redis::Client::open("redis://10.12.233.10:8080").unwrap();
-    let redis_con = redis_client.get_connection().unwrap();
 
     //设置为非阻塞IO
     listener.set_nonblocking(true).unwrap();

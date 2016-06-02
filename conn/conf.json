@@ -1,5 +1,5 @@
 {
 	"inst_id":1,
-	"busd_addr": "",
-
+	"shm_addr": "redis://10.12.233.10:8080",
+    "app_type": "CONN",
 }

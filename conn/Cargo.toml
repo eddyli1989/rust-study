@@ -10,4 +10,3 @@ path = "src/main_non_block.rs"
 
 [dependencies]
 comm = { path = "../comm" }
-redis = "0.5.3"
