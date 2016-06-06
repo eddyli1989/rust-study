@@ -42,7 +42,7 @@ impl ShmMgr {
         match src {
             CONN => {
                 let inst_id = Config::instance().get_inst_id();
-                format!("{}:{}{}:->{}{}",BUS_PRE,CONN,inst_id,ZONE,inst_id)
+                format!("{}:{}{}->{}{}",BUS_PRE,CONN,inst_id,ZONE,inst_id)
             },
             _ => {
                 String::new()
@@ -59,8 +59,10 @@ impl ShmMgr {
             Err { code:redis_err.kind() as i32, desc:redis_err.category().to_string() }
         }));
         let key = self.get_dst_addr(Config::instance().get_app_type());
-        connection.lpush(key,buf).map_err(|redis_err| {
+        try!(connection.lpush(key.as_str(),buf).map_err(|redis_err| {
             Err {code:redis_err.kind() as i32, desc:redis_err.category().to_string()}
-        })
+        }));
+        println!("put pkg to:{},success", key);
+        Ok(())
     }
 }

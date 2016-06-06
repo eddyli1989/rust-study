@@ -134,7 +134,11 @@ fn handle_client(connect:&mut ConnectInfo) ->i32 {
                 return 0;
             }
 
-            ShmMgr::instance().send((buffer[0..*pkg_size]).to_vec());
+            let ret = ShmMgr::instance().send((buffer[0..*pkg_size]).to_vec());
+            match ret {
+                Ok(_) => {},
+                Err(err) => {println!("send error,code:{:?},desc:{}", err.code,err.desc);}
+            }
 
             unsafe { pkg =  mem::transmute(*buffer); }
             println!("pkg is read done,data is:");

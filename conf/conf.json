@@ -1,0 +1,5 @@
+{
+	"inst_id":1,
+	"shm_addr": "redis://10.12.233.10:6379",
+    "app_type": "CONN"
+}
